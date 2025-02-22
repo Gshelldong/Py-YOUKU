@@ -1,3 +1,4 @@
+```text
 
 
 服务端:
@@ -43,6 +44,7 @@
 	7.查看观影记录
 '''
 
+# 然后再从models着手开始。
 数据库表的设计:
 
 youku_demo
@@ -58,3 +60,9 @@ youku_demo
 
     DownloadRecord:
         id, user_id, movie_id, download_time
+
+
+1、把表通过orm创建相关的表类
+2、先把主要的部分监听和run写好，客户端和服务端简单的通讯
+3、客户端打印功能菜单，搭建项目的主要功能函数框架
+```
