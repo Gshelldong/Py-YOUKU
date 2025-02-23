@@ -1,6 +1,6 @@
-import json
 import socket
-import struct
+from lib import common
+
 
 from tcp_client import socket_client
 
@@ -28,17 +28,9 @@ def register(client: socket.socket):
                 'type': 'register',
                 'user_type': 'admin'
             }
-            # 发送给服务端的过程
-            data_bytes = json.dumps(send_dict).encode('utf-8')
-            headers = struct.pack('i',len(data_bytes))
-            client.send(headers)
-            client.send(data_bytes)
+            # 发送给服务端的过程,封装在公共组件里面，因为每个过程都会和服务器交互
+            back_dic = common.send_msg_back_dic(send_dict, client)
 
-            # 接收服务端数据的过程
-            headers = client.recv(4)
-            data_len = struct.unpack('i',headers)[0]
-            data_bytes = client.recv(data_len)
-            back_dic = json.loads(data_bytes.decode('utf-8'))
             if back_dic.get('flag'):
                 print(back_dic.get('msg'))
                 break
