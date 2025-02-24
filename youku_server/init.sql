@@ -1,4 +1,4 @@
-create table User(
+create table user(
     id int auto_increment primary key,
     name varchar(255),
     pwd varchar(255),
@@ -8,7 +8,7 @@ create table User(
     register_time timestamp
 );
 
-CREATE table Movie(
+CREATE table movie(
   id int auto_increment primary key,
   name varchar(255),
   path varchar(255),
@@ -19,7 +19,7 @@ CREATE table Movie(
   upload_time timestamp
 );
 
-create table Notice(
+create table notice(
     id int auto_increment primary key ,
     title varchar(255),
     content varchar(255),
@@ -27,7 +27,7 @@ create table Notice(
     create_time timestamp
 );
 
-CREATE TABLE DownloadRecord (
+CREATE TABLE downloadrecord (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT,
     movie_id INT,

@@ -1,7 +1,6 @@
 import socket
 from lib import common
 
-
 from tcp_client import socket_client
 
 """
@@ -12,6 +11,11 @@ from tcp_client import socket_client
 	4.删除视频
 	5.发布公告
 """
+
+# 保存用户状态的字典
+user_info = {
+    'cookies': None
+}
 
 # 在这里说明之后，在方法里面去.这个参数的时候就会有相应类型的自动补全
 def register(client: socket.socket):
@@ -37,10 +41,30 @@ def register(client: socket.socket):
             else:
                 print(back_dic.get('msg'))
 
-def login():
-    pass
+def login(client: socket.socket):
+    while True:
+        username = input('请输入用户名: ').strip()
+        password = input('请输入密码: ').strip()
 
-def upload_movie():
+        send_dic = {
+            'type': 'login',
+            'username': username,
+            'password': password,
+            'user_type': 'admin'
+        }
+
+        # 把认证的信息发送到服务端
+        back_dic = common.send_msg_back_dic(send_dic, client) # type: dict
+
+        if back_dic.get('flag'):
+            session = back_dic.get('session')
+            user_info['cookies']: session
+            print(back_dic.get('msg'))
+            break
+        else:
+            print(back_dic.get('msg'))
+
+def upload_movie(client: socket.socket):
     pass
 
 def delete_move():

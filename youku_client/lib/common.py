@@ -9,6 +9,7 @@ def send_msg_back_dic(send_dict, client):
 
     # 接收服务端数据的过程
     headers = client.recv(4)
+    print('headers', headers)
     data_len = struct.unpack('i', headers)[0]
     print('data_len: ',data_len)
     data_bytes = client.recv(data_len)

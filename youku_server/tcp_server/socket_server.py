@@ -2,11 +2,25 @@ import socket
 import struct
 import json
 from concurrent.futures import ThreadPoolExecutor
-from interface import common_interface
+from interface import common_interface,admin_interface
+
+from threading import Lock
+from lib import lock_file
+
+# 生成一把锁
+lock = Lock()
+lock_file.mutex = lock
+
 
 func_dic = {
     'register': common_interface.register_interface,
-    'login': common_interface.login_interface
+    'login': common_interface.login_interface,
+    'check_movie': admin_interface.check_movie_interface,
+    'upload_movie': admin_interface.upload_movie_interface,
+    'get_movie_list': common_interface.get_movie_list_interface,
+    'delete_movie': admin_interface.delete_movie_interface,
+    'put_notice': admin_interface.put_notice_interface
+
 }
 
 
@@ -22,6 +36,7 @@ class SocketServer:
         while True:
             conn, addr = self.server.accept()
             self.pool.submit(self.working, conn, addr)
+        # self.working(conn,addr)
 
     def dispatcher(self,client_back_dic, conn):
         _type = client_back_dic.get('type')

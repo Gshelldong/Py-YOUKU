@@ -122,7 +122,7 @@ class Models(dict, metaclass=OrmMetaClass):
 
         # 若有kwargs代表有条件
         else:
-            print(kwargs)  # {id:1}
+            # print(kwargs)  # {id:1}
             key = list(kwargs.keys())[0]  # id
             value = kwargs.get(key)  # 1
 
@@ -134,7 +134,6 @@ class Models(dict, metaclass=OrmMetaClass):
             sql = sql.replace('?', '%s')
 
             res = ms.my_select(sql, value)
-            print(res)
 
         if res:
             # [{},{}, {}]   ---->  [obj1, obj2, obj3]
