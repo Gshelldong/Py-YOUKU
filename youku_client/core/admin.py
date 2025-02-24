@@ -1,4 +1,7 @@
+import os.path
 import socket
+
+from conf import settings
 from lib import common
 
 from tcp_client import socket_client
@@ -58,14 +61,49 @@ def login(client: socket.socket):
 
         if back_dic.get('flag'):
             session = back_dic.get('session')
-            user_info['cookies']: session
+            user_info['cookies'] = session
+            print(user_info['cookies'])
             print(back_dic.get('msg'))
             break
         else:
             print(back_dic.get('msg'))
 
 def upload_movie(client: socket.socket):
-    pass
+    while True:
+        # 1.打印电影列表
+        movie_list =  common.get_movie_list()
+        for index, movie in enumerate(movie_list):
+            print(index, movie)
+
+        choice = input('请输入上传电影的编号: ').strip()
+
+        if not choice.isdigit():
+            print('请输入数字!')
+            continue
+
+        choice = int(choice)
+        if choice not in range(len(movie_list)):
+            print('请输入正确的编号!')
+            continue
+
+        movie_name = movie_list[choice]
+
+        movie_path = os.path.join(
+            settings.UPLOAD_FILES, movie_name
+        )
+
+        file_md5 = common.get_movie_md5(movie_path)
+
+        send_dic = {
+            'type': 'check_movie',
+            'session': user_info.get('cookies'),
+            'file_md5': file_md5
+        }
+
+        # 做电影文件的校验
+        back_dic = common.send_msg_back_dic(send_dic,client)
+        print(back_dic)
+        break
 
 def delete_move():
     pass

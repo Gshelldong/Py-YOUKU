@@ -97,7 +97,7 @@ class Models(dict, metaclass=OrmMetaClass):
 
     # 在对象.属性没有的时候触发
     def __getattr__(self, item):
-        print('item: ',item) # item 是对象.name  item -> name
+        # print('item: ',item) # item 是对象.name  item -> name
         return self.get(item, '没有这个key')
 
     # 在对象.属性 = 属性值 时触发

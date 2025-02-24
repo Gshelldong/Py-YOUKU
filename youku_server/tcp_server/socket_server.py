@@ -52,6 +52,7 @@ class SocketServer:
                 data_len = struct.unpack('i', headers)[0]
                 data_bytes = conn.recv(data_len)
                 client_back_dic = json.loads(data_bytes.decode('utf-8'))  # type: dict
+                client_back_dic['addr'] = str(addr)
                 self.dispatcher(client_back_dic,conn)
             except Exception as e:
                 conn.close()

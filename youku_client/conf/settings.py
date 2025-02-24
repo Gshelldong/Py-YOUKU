@@ -5,5 +5,3 @@ BASE_PATH = os.path.dirname(
 )
 
 UPLOAD_FILES = os.path.join(BASE_PATH,'upload_files')
-
-# TODO

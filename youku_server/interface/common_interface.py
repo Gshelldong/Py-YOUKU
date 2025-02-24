@@ -46,11 +46,14 @@ def login_interface(client_back_dic: dict,conn):
         if user_obj.pwd == common.get_md5_pwd(password):
             # 产生一个随机的字符串作为session值
             session = common.get_random_code()
+
+            addr = client_back_dic.get('addr')
             # 保存session值到服务端，session + user_id一同保存到服务端本地
             # 使用锁写入数据
             lock_file.mutex.acquire()
-            user_data.user_online['addr'] = [session, user_obj.id]
+            user_data.user_online[addr] = [session, user_obj.id]
             lock_file.mutex.release()
+            print(user_data.user_online)
 
             send_dic = {'flag': True,'msg': '登陆成功!','session': session}
         else:

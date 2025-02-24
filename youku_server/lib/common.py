@@ -33,9 +33,13 @@ def login_auth(func):
     # 接口层包含两个位置参数，client_back_dic,conn
     # 获取客户端传过来的session，和服务端的做对比，如果一致就认为用户登陆状态合法
     def inner(*args, **kwargs):
+        print(args[0])
         addr = args[0].get('addr')
+        print(addr)
         # 服务端存放的session
         user_session = user_data.user_online.get(addr)
+        print('serser user_session: ',user_session)
+        # TODO
         if user_session:
             if args[0].get('session') == user_session[0]:
                 args[0]['user_id'] = user_session[1]

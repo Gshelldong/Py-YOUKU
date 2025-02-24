@@ -1,3 +1,1 @@
-user_online = {
-    'addr': None
-}
+user_online = {}
