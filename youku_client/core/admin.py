@@ -103,13 +103,94 @@ def upload_movie(client: socket.socket):
         # 做电影文件的校验
         back_dic = common.send_msg_back_dic(send_dic,client)
         print(back_dic)
-        break
 
-def delete_move():
-    pass
+        if back_dic.get('flag'):
+            print(back_dic.get('msg'))
 
-def put_notice():
-    pass
+            send_dic = {
+                'type': 'upload_movie',
+                'file_md5': file_md5,
+                'file_size': os.path.getsize(movie_path),
+                'movie_name': movie_name,
+                'session': user_info.get('cookies')
+            }
+
+            is_free = input('上传的电影是否免费: y/n: (Default "n")').strip()
+
+            if is_free == 'y':
+                send_dic['is_free'] = 1
+            else:
+                send_dic['is_free'] = 0
+
+            back_dic = common.send_msg_back_dic(send_dic, client, file = movie_path)
+            if back_dic.get('flag'):
+                print(back_dic.get('msg'))
+                break
+        else:
+            print(back_dic.get('msg'))
+
+
+# 删除电影
+def delete_move(client):
+    while True:
+        # 先从服务端获取电影的列表
+        send_dic = {
+            'type': 'get_movie_list',
+            'session': user_info.get('cookies'),
+            'movie_type': 'all'
+        }
+
+        # 发送获取电影请求
+        back_dic = common.send_msg_back_dic(send_dic, client)
+        if back_dic.get('flag'):
+            back_movie_list = back_dic.get('back_movie_list')
+            # 打印选择的电影
+            for index, movie_list in enumerate(back_movie_list):
+                print(index, movie_list)
+
+            # 选择要删除的电影
+            choice = input('请输入要删除的电影编号: ').strip()
+
+            if choice == 'q':
+                break
+
+            if not choice.isdigit():
+                continue
+
+            choice = int(choice)
+
+            if choice not in range(len(back_dic)):
+                continue
+
+            # back_movie_list[choice] => [movie_obj.name, '免费' if movie_obj.is_free else "收费", movie_obj.id]
+            movie_id = back_movie_list[choice][2]
+
+            send_dic = {
+                'type': 'delete_movie', 'movie_id': movie_id, 'session': user_info.get('cookies')
+            }
+
+            # 发送删除电影的请求
+            back_dic = common.send_msg_back_dic(send_dic, client)
+            if back_dic.get('flag'):
+                print(back_dic.get('msg'))
+                break
+        else:
+            print(back_dic.get('msg'))
+            break
+
+def put_notice(client):
+    title = input("请输入公告标题: ").strip()
+    content = input('请输入公告内容: ').strip()
+
+    send_dic = {
+        'type': 'put_notice',
+        'session': user_info.get('cookies'),
+        'title': title,
+        'content': content
+    }
+
+    back_dic = common.send_msg_back_dic(send_dic, client)
+    print(back_dic.get('msg'))
 
 func_dic = {
     '1': register,
@@ -121,6 +202,8 @@ func_dic = {
 
 # 展示用户的功能菜单
 def admin_view():
+    sk_client = socket_client.SocketClient()
+    client = sk_client.get_client()
     while True:
         print(
         """
@@ -138,7 +221,4 @@ def admin_view():
         if choice not in func_dic:
             print('请选择正确的功能选项!')
             continue
-
-        sk_client = socket_client.SocketClient()
-        client = sk_client.get_client()
         func_dic.get(choice)(client)

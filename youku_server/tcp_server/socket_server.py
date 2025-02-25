@@ -2,10 +2,11 @@ import socket
 import struct
 import json
 from concurrent.futures import ThreadPoolExecutor
-from interface import common_interface,admin_interface
+from interface import common_interface,admin_interface,user_interface
 
 from threading import Lock
 from lib import lock_file
+from db import user_data
 
 # 生成一把锁
 lock = Lock()
@@ -19,8 +20,11 @@ func_dic = {
     'upload_movie': admin_interface.upload_movie_interface,
     'get_movie_list': common_interface.get_movie_list_interface,
     'delete_movie': admin_interface.delete_movie_interface,
-    'put_notice': admin_interface.put_notice_interface
+    'put_notice': admin_interface.put_notice_interface,
 
+    # 普通用户的功能
+    'buy_vip': user_interface.by_vip_interface,
+    'download_movie': user_interface.download_movie_interface
 }
 
 
@@ -55,5 +59,9 @@ class SocketServer:
                 client_back_dic['addr'] = str(addr)
                 self.dispatcher(client_back_dic,conn)
             except Exception as e:
+                print(e)
+                lock.acquire()
+                user_data.user_online.pop(str(addr))
+                lock.release()
                 conn.close()
                 break

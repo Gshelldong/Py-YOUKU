@@ -4,11 +4,17 @@ import os.path
 import struct
 from conf import settings
 
-def send_msg_back_dic(send_dict, client):
+def send_msg_back_dic(send_dict, client, file=None):
     data_bytes = json.dumps(send_dict).encode('utf-8')
     headers = struct.pack('i', len(data_bytes))
     client.send(headers)
     client.send(data_bytes)
+
+    # 上传电影
+    if file:
+        with open(file, 'rb') as f:
+            for line in f:
+                client.send(line)
 
     # 接收服务端数据的过程
     headers = client.recv(4)
