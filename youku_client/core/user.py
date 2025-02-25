@@ -122,7 +122,7 @@ def download_free_movie(client):
 
             if choice not in range(len(movie_list)):
                 continue
-
+            # 0 -- ['06d3ae46ec08a2929ebf236cf75045a7打牌.mp4', '免费', 3]
             movie_name, movie_type, movie_id = movie_list[choice]
 
             send_dic = {

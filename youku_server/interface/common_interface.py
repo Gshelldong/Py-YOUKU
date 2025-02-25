@@ -83,7 +83,7 @@ def get_movie_list_interface(client_back_dic, conn):
                 elif client_back_dic.get('movie_type') == 'free':
                     # 判断哪些是免费的
                     if movie_obj.is_free:
-                        back_movie_list.append(movie_obj.name, '免费', movie_obj.id)
+                        back_movie_list.append([movie_obj.name, '免费', movie_obj.id])
                 else:
                     if not movie_obj.is_free:
                         back_movie_list.append(

@@ -17,11 +17,16 @@ def get_time():
     now_time = time.strftime('%Y-%m-%d %X')
     return now_time
 
-def send_data(send_dic, conn):
+def send_data(send_dic, conn, file=None):
     data_bytes = json.dumps(send_dic).encode('utf-8')
     headers = struct.pack('i', len(data_bytes))
     conn.send(headers)
     conn.send(data_bytes)
+
+    if file:
+        with open(file, mode='rb') as f:
+            for line in f:
+                conn.send(line)
 
 def get_random_code():
     md5 = hashlib.md5()

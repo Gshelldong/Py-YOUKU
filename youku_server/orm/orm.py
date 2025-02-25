@@ -177,6 +177,7 @@ class Models(dict, metaclass=OrmMetaClass):
         )
 
         sql = sql.replace('?', '%s')
+        print('save insert sql -- ',sql)
 
         ms.my_execute(sql, values)
 
