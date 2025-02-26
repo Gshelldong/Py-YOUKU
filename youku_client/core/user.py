@@ -10,6 +10,7 @@ user_info = {
     'is_vip': None
 }
 
+
 def register(client):
     while True:
         username = input('请输入用户名: ').strip()
@@ -34,7 +35,9 @@ def register(client):
                 print(back_dic.get('msg'))
                 break
             else:
-                print(back_dic.get('msg'))
+                print(back_dic.get('msg\n注册失败!'))
+                break
+
 
 def login(client):
     while True:
@@ -49,20 +52,21 @@ def login(client):
         }
 
         # 把认证的信息发送到服务端
-        back_dic = common.send_msg_back_dic(send_dic, client) # type: dict
+        back_dic = common.send_msg_back_dic(send_dic, client)  # type: dict
+        print('登陆成功服务端的返回: ', back_dic)
 
         if back_dic.get('flag'):
             session = back_dic.get('session')
             user_info['cookies'] = session
             user_info['is_vip'] = back_dic.get('is_vip')
-            print(user_info['cookies'])
-            print(back_dic.get('msg'))
+            print('本地的cookies缓存: ', user_info)
 
             if back_dic.get('new_notice'):
                 print(back_dic.get('new_notice'))
             break
         else:
             print(back_dic.get('msg'))
+
 
 def by_vip(client):
     # 从本地就先进行判断了
@@ -84,17 +88,21 @@ def by_vip(client):
     else:
         ('快去充值100w!')
 
+
 def check_all_movie(client):
     send_dic = {
         'type': 'get_movie_list',
-        'session': user_info.get('cookies')
+        'session': user_info.get('cookies'),
+        'movie_type': 'all'
     }
 
-    back_dic = common.send_msg_back_dic(send_dic,client)
+    back_dic = common.send_msg_back_dic(send_dic, client)
     if back_dic.get('flag'):
-        print(back_dic.get('back_movie_list'))
+        for movie_name, free, movie_id in back_dic.get('back_movie_list'):
+            print("%s -- %s -- %s" % (movie_name, free, movie_id))
     else:
         print(back_dic.get('msg'))
+
 
 def download_free_movie(client):
     while True:
@@ -111,7 +119,7 @@ def download_free_movie(client):
             # 2.选择下载的免费电影，并提交给服务端
             movie_list = back_dic.get('back_movie_list')
             for index, movie in enumerate(movie_list):
-                print("%s -- %s"%(index, movie))
+                print("%s -- %s" % (index, movie))
 
             choice = input('请输入下载的电影编号: ').strip()
 
@@ -133,10 +141,15 @@ def download_free_movie(client):
                 'movie_type': movie_type
             }
 
-            back_dic = common.send_msg_back_dic(send_dic,client)
+            back_dic = common.send_msg_back_dic(send_dic, client)
 
             if back_dic.get('flag'):
                 # 3.开始下载电影
+                path_exists = os.path.exists(settings.DOWNLOAD_FILES)
+
+                if not path_exists:
+                    os.mkdir(settings.DOWNLOAD_FILES)
+
                 movie_path = os.path.join(settings.DOWNLOAD_FILES, movie_name)
                 movie_size = back_dic.get('movie_size')
 
@@ -160,14 +173,113 @@ def download_free_movie(client):
             print(back_dic.get('msg'))
             break
 
+
 def download_pay_movie(client):
-    pass
+    while True:
+        if user_info.get('is_vip'):
+            is_pay = input('VIP打骨折，收费5$一部(y/n): ').strip()
+        else:
+            is_pay = input('普通用户，收费50$一部(y/n): ').strip()
+
+        if not is_pay == 'y':
+            print('请充值!')
+            break
+
+        # 1. 获取服务端所有收费电影
+        send_dic = {
+            'type': 'get_movie_list',
+            'session': user_info.get('cookies'),
+            'movie_type': 'pay'
+        }
+
+        back_dic = common.send_msg_back_dic(send_dic, client)
+
+        if back_dic.get('flag'):
+            # 2.选择下载的免费电影，并提交给服务端
+            movie_list = back_dic.get('back_movie_list')
+            for index, movie in enumerate(movie_list):
+                print("%s -- %s" % (index, movie))
+
+            choice = input('请输入下载的电影编号: ').strip()
+
+            if not choice.isdigit():
+                continue
+
+            choice = int(choice)
+
+            if choice not in range(len(movie_list)):
+                continue
+            # 0 -- ['06d3ae46ec08a2929ebf236cf75045a7打牌.mp4', '免费', 3]
+            movie_name, movie_type, movie_id = movie_list[choice]
+
+            send_dic = {
+                'type': 'download_movie',
+                'session': user_info.get('cookies'),
+                'movie_id': movie_id,
+                'movie_name': movie_name,
+                'movie_type': movie_type
+            }
+
+            back_dic = common.send_msg_back_dic(send_dic, client)
+
+            if back_dic.get('flag'):
+                # 3.开始下载电影
+                path_exists = os.path.exists(settings.DOWNLOAD_FILES)
+
+                if not path_exists:
+                    os.mkdir(settings.DOWNLOAD_FILES)
+
+                movie_path = os.path.join(settings.DOWNLOAD_FILES, movie_name)
+                movie_size = back_dic.get('movie_size')
+
+                wait_time = back_dic.get('wait_time')
+
+                # 准备下载电影: 判断是否是VIP，若不是则等待广告播放
+                if wait_time:
+                    print('广告时间。。。。。')
+                    time.sleep(wait_time)
+
+                recv_data = 0
+
+                with open(movie_path, 'wb') as f:
+                    while recv_data < movie_size:
+                        data = client.recv(1024)
+                        f.write(data)
+                        recv_data += len(data)
+                    f.flush()
+                print('电影下载成功!')
+                break
+        else:
+            print(back_dic.get('msg'))
+            break
+
 
 def check_download_record(client):
-    pass
+    send_dic = {
+        'type': 'check_download_record',
+        'session': user_info.get('cookies')
+    }
+
+    back_dic = common.send_msg_back_dic(send_dic, client)
+
+    if back_dic.get('flag'):
+        # 返回电影下载记录
+        print(back_dic.get('record_list'))
+    else:
+        print(back_dic.get('msg'))
+
 
 def check_all_notice(client):
-    pass
+    send_dic = {
+        'type': 'check_all_notice',
+        'session': user_info.get('cookies')
+    }
+
+    back_dic = common.send_msg_back_dic(send_dic, client)
+    if back_dic.get('flag'):
+        print(back_dic.get('back_notice_list'))
+    else:
+        print(back_dic.get('msg'))
 
 
 func_dic = {
@@ -188,16 +300,18 @@ def user_view():
 
     while True:
         print(
-        """
-        1.注册
-        2.登录
-        3.充会员
-        4.查看视频
-        5.下载免费视频
-        6.下载会员视频
-        7.查看观影记录
-        8.查看所有公告
-        """
+            """
+            1.注册
+            2.登录
+            3.充会员
+            4.查看视频
+            5.下载免费视频
+            6.下载会员视频
+            7.查看观影记录
+            8.查看所有公告
+            
+            按q退出!
+            """
         )
 
         choice = input('请选择功能编号: ').strip()
@@ -209,4 +323,3 @@ def user_view():
             break
 
         func_dic.get(choice)(client)
-

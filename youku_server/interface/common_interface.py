@@ -41,6 +41,8 @@ def login_interface(client_back_dic: dict, conn):
     else:
         user_obj = user_list[0]
         password = client_back_dic.get('password')
+        is_vip = user_obj.get('is_vip')
+        print('%s用户是否是vip: %s'%(username, is_vip))
 
         # 判断用户对象的密码和数据库的密码是否一致
         if user_obj.pwd == common.get_md5_pwd(password):
@@ -55,7 +57,7 @@ def login_interface(client_back_dic: dict, conn):
             lock_file.mutex.release()
             print("user_online => ",user_data.user_online)
 
-            send_dic = {'flag': True, 'msg': '登陆成功!', 'session': session}
+            send_dic = {'flag': True, 'msg': '登陆成功!', 'session': session, 'is_vip': is_vip}
 
             new_notice = get_new_notice_interface()
             if new_notice:
@@ -68,6 +70,7 @@ def login_interface(client_back_dic: dict, conn):
 # 获取电影列表接口
 @common.login_auth
 def get_movie_list_interface(client_back_dic, conn):
+    print('走到这里来了')
     # 获取所有电影对象
     movie_obj_list = models.Movie.select()
     back_movie_list = []

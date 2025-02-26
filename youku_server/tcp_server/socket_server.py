@@ -24,7 +24,9 @@ func_dic = {
 
     # 普通用户的功能
     'buy_vip': user_interface.by_vip_interface,
-    'download_movie': user_interface.download_movie_interface
+    'download_movie': user_interface.download_movie_interface,
+    'check_download_record': user_interface.check_download_record_interface,
+    'check_all_notice': user_interface.check_all_notice_record_interface
 }
 
 
